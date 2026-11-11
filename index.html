@@ -225,6 +225,7 @@ body.rpon .rp{display:flex}body.rpon .btns{display:none}body.rpon .g{animation:n
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="lg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#2f6b4f"/><g fill="#fffdf5" stroke="#2a1f15" stroke-width="12" stroke-linejoin="round"><circle cx="256" cy="168" r="52"/><rect x="206" y="214" width="100" height="24" rx="12"/><polygon points="222,238 290,238 300,285 322,330 346,372 166,372 190,330 212,285"/><rect x="146" y="372" width="220" height="38" rx="19"/></g></symbol></svg>
 <div class="game">
+  <button id="gb" type="button" aria-label="Back to main menu"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span>Back</span></button>
   <div class="brow"><div class="evb" title="Evaluation"><i id="evi"></i></div><div class="bw" id="bw"><div class="pbar b" id="pbb"><i class="pg b">&#9818;&#xFE0E;</i><div class="pi"><b id="pnb">Black</b><div class="cr w" id="cb"></div></div><div class="ck" id="ckb" hidden></div></div>
   <div id="board" class="board">
     <div class="sqs" id="sqs"></div>
@@ -237,6 +238,8 @@ body.rpon .rp{display:flex}body.rpon .btns{display:none}body.rpon .g{animation:n
     <div class="sh"><svg class="lg"><use href="#lg"/></svg><b>ChessNova <span class="ver">v1.1.2</span></b><span id="shd">Play Computer</span></div>
     <div id="st" class="status"></div>
     <div id="pzb"><div class="pt"><b id="pzt">Puzzle</b><small id="pzs"></small></div><button id="pzh">Hint</button><button id="pzn">Skip</button><button id="pzm">Menu</button></div>
+    <div id="lnt"></div>
+    <div id="lnb"><button id="lnp">‹ Back</button><button id="lnh">💡 Hint</button><button id="lnl">Lessons</button><button id="lnmn">⌂ Menu</button><button id="lnn" class="nx">Next ›</button></div>
     <div class="mv" id="mv"></div>
     <div class="btns">
       <button id="nw">New game</button><button id="un">Undo</button><button id="fl">Flip board</button>
@@ -254,6 +257,7 @@ body.rpon .rp{display:flex}body.rpon .btns{display:none}body.rpon .g{animation:n
 <div class="bgp" aria-hidden="true"><span style="--x:5%;--y:10%;--d:0s">&#9822;&#xFE0E;</span><span style="--x:84%;--y:8%;--d:-1.5s">&#9819;&#xFE0E;</span><span style="--x:7%;--y:72%;--d:-3s">&#9820;&#xFE0E;</span><span style="--x:83%;--y:70%;--d:-4.5s">&#9821;&#xFE0E;</span></div>
 <div class="card">
   <button id="bk" class="bk" type="button" aria-label="Back to game" hidden><svg class="ic" viewBox="0 0 24 24" width="18" height="18"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span>Back</span></button>
+  <button id="dn" class="dn" type="button" aria-label="Switch day / night theme"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg></button>
   <header class="hd"><div class="mark"><svg class="lg2"><use href="#lg"/></svg></div><div><h2>ChessNova <span class="ver">v1.1.2</span></h2><p class="tag">A New Era of Chess.</p></div></header>
   <section class="sec"><h3 class="k">Play against</h3>
     <div class="seg m2 modes" data-k="mode" role="group" aria-label="Play against">
@@ -285,7 +289,7 @@ body.rpon .rp{display:flex}body.rpon .btns{display:none}body.rpon .g{animation:n
   <div class="sum" id="sum"></div>
   <button id="ins" class="go alt" hidden>Install app</button>
   <button id="go" class="go"><span>Start game</span><svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-  <button id="pz" class="go alt" type="button"><span>Puzzles</span></button>
+  <div class="row2"><button id="pz" class="go alt" type="button"><span>Puzzles</span></button><button id="ln" class="go alt" type="button"><span>Learn to play</span></button></div>
 </div></div>
 <script>
 const $=s=>document.querySelector(s),U='\uFE0E',GL={k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'};
@@ -438,11 +442,11 @@ $('#un').onclick=()=>{if(busy||!H.length)return;do{S=H.pop().S}while(ai&&S.t!=hc
 $('#fl').onclick=()=>{flip=!flip;for(const i in els)pos(els[i],+i);paint()};
 $('#mn').onclick=()=>{window.rpExit&&rpExit();gid++;busy=false;$('#start').classList.remove('hide')};
 const TH=['auto','light','dark'],mqd=matchMedia('(prefers-color-scheme:dark)');
-let ti=Math.max(0,TH.indexOf((()=>{try{return localStorage.getItem('cn-theme')}catch(e){}})()));
+let ti=(()=>{let v=null;try{v=localStorage.getItem('cn-theme')}catch(e){}const i=TH.indexOf(v);return i<0?1:i})();
 function applyTheme(){const d=document.documentElement;TH[ti]=='auto'?d.removeAttribute('data-theme'):d.dataset.theme=TH[ti];
   $('#th').textContent='Theme: '+TH[ti][0].toUpperCase()+TH[ti].slice(1);
   const m=document.querySelector('meta[name=theme-color]');if(m)m.content=getComputedStyle(d).getPropertyValue('--bg').trim()||'#e9e4d8'}
-$('#th').onclick=()=>{ti=(ti+1)%3;try{ti?localStorage.setItem('cn-theme',TH[ti]):localStorage.removeItem('cn-theme')}catch(x){}applyTheme();SND.tick()};
+$('#th').onclick=()=>{ti=(ti+1)%3;try{localStorage.setItem('cn-theme',TH[ti])}catch(x){}applyTheme();SND.tick()};
 (mqd.addEventListener?mqd.addEventListener('change',applyTheme):0);applyTheme();
 let hc='w',lvl=2;const opts={mode:'cpu',side:'w',lvl:'2',snd:'1',tm:'0'};
 document.querySelectorAll('.seg').forEach(g=>g.onclick=e=>{const b=e.target.closest('button');if(!b)return;g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x==b));opts[g.dataset.k]=b.dataset.v;$('#start').classList.toggle('two',opts.mode=='two')});
@@ -646,7 +650,6 @@ info();
 $('#mn').addEventListener('click',()=>{bk.hidden=false});
 $('#go').addEventListener('click',()=>{bk.hidden=true});
 bk.onclick=()=>{$('#start').classList.add('hide');bk.hidden=true;if(!over&&!RP.on)turn()};
-document.addEventListener('keydown',e=>{if(e.key=='Escape'&&!bk.hidden)bk.click()});
 })();
 </script>
 <style>
@@ -705,6 +708,168 @@ $('#pz').onclick=()=>{$('#start').classList.add('hide');$('#bk').hidden=true;sta
 $('#go').addEventListener('click',()=>{PZ.on=0;document.body.classList.remove('pzon')});
 const lab=()=>$('#pz span').textContent='Puzzles · '+D.r;lab();setInterval(lab,1500);
 })();
+</script>
+<style>
+#lnt,#lnb{display:none}
+body.lnon #lnt{display:block;padding:10px 12px;border-radius:8px;background:var(--bg);font:500 .9rem/1.45 system-ui,sans-serif;min-height:92px;flex:none}
+body.lnon #lnt b{display:block;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--mu);margin-bottom:3px}
+body.lnon #lnb{display:flex;gap:6px;flex:none}
+body.lnon .pbar,body.lnon .side .btns,body.lnon .mv,body.lnon .evb,body.lnon .sh,body.lnon #op,body.lnon #pzb{display:none!important}
+#lnb button{flex:1;height:38px;border-radius:9px;font:700 .82rem system-ui;background:var(--card);color:var(--tx);border:1px solid var(--bd);cursor:pointer}
+#lnb button.nx{flex:1.6;background:var(--ac);color:var(--onac);border-color:var(--ac)}
+#lnb button:disabled{opacity:.4;cursor:default}#lnb button[hidden]{display:none}
+@media (max-width:820px){#lnt,#lnb{width:var(--bs)}}
+#lnm{position:fixed;inset:0;z-index:60;background:var(--bg);color:var(--tx);display:none;overflow:auto;padding:max(12px,env(safe-area-inset-top,0px)) 12px 24px}
+#lnm.show{display:block}#lnm .in{max-width:520px;margin:0 auto;display:grid;gap:10px}
+#lnm h2{margin:6px 0 0;font-size:1.4rem}#lnm p{margin:0 0 4px;color:var(--mu);font:500 .85rem system-ui}
+#lnm .top{display:flex;align-items:center;gap:8px}
+#lnm .top button,#lnm .lc{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);cursor:pointer}
+#lnm .top button{padding:7px 14px;border-radius:999px;font:700 .82rem system-ui}
+#lnm .lc{display:grid;grid-template-columns:38px 1fr auto;gap:2px 12px;align-items:center;text-align:left;padding:12px 14px;border-radius:14px}
+#lnm .lc i{grid-row:span 2;font:normal 700 1.2rem system-ui;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--bg)}
+#lnm .lc b{font:700 1rem system-ui}#lnm .lc small{color:var(--mu);font:500 .78rem system-ui}#lnm .lc em{grid-row:span 2;font-style:normal;color:var(--ac);font-weight:800}
+#lnm .lc.dn i{background:var(--ac);color:var(--onac)}
+</style>
+<script>
+/* learn to play: guided lessons on the real board */
+(()=>{
+const SP='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',F=b=>b+' w - - 0 1';
+const LS=[
+{n:'The board & the goal',d:'Squares, pieces and how to win',s:[
+[SP,'Welcome! Chess is played on an 8×8 board by two players, White and Black. Each side starts with 16 pieces.'],
+[SP,'Columns are called <b>files</b> (a–h) and rows are <b>ranks</b> (1–8). Every square has a name, like e4. White always moves first, then you take turns.'],
+[SP,'Each side has 8 pawns, 2 rooks, 2 knights, 2 bishops, 1 queen and 1 king. Tap any piece to see where it can go — we will learn each one next.','e2'],
+[SP,'<b>The goal:</b> checkmate — attack the enemy king so it cannot escape. The king is never captured; the game just ends when it is trapped.']]},
+{n:'The pawn',d:'Forward steps, diagonal captures, promotion',s:[
+[F('4k3/8/8/8/8/8/4P3/7K'),'Pawns move <b>forward</b> one square, never backward. From their starting square they may move one or two squares.','e2'],
+[F('4k3/8/8/8/8/8/4P3/7K'),'Your turn: move the pawn <b>two squares</b> forward to e4.','e2',['e4']],
+[F('4k3/8/8/3p1p2/4P3/8/8/7K'),'Pawns capture <b>diagonally</b>, one square forward. The dots show the two captures available here.','e4'],
+[F('4k3/8/8/3p1p2/4P3/8/8/7K'),'Capture one of the black pawns!','e4',['d5','f5']],
+[F('4k3/P7/8/8/8/8/8/7K'),'A pawn that reaches the far end of the board is <b>promoted</b> — usually to a queen. Push this pawn to a8 and choose a piece.','a7',['a8']]]},
+{n:'The rook',d:'Straight lines, any distance',s:[
+[F('4k3/8/8/8/3R4/8/8/7K'),'Rooks move any number of squares in a <b>straight line</b> — along files and ranks. They cannot jump over pieces.','d4'],
+[F('4k3/8/8/8/3R2p1/8/8/7K'),'Pieces capture by landing on an enemy piece. Capture the pawn on g4 with your rook.','d4',['g4']]]},
+{n:'The bishop',d:'Diagonals only',s:[
+[F('4k3/8/8/8/3B4/8/8/7K'),'Bishops move any distance <b>diagonally</b>. Each bishop stays on the same colour of square its whole game.','d4'],
+[F('4k3/8/8/6p1/8/8/8/2B4K'),'Capture the pawn on g5 with your bishop.','c1',['g5']]]},
+{n:'The queen',d:'The most powerful piece',s:[
+[F('4k3/8/8/8/3Q4/8/8/7K'),'The queen combines a rook and a bishop: any distance in <b>any straight or diagonal line</b>. She is your strongest piece — protect her!','d4'],
+[F('4k3/8/8/8/3Q2r1/8/8/7K'),'Capture the black rook with your queen.','d4',['g4']]]},
+{n:'The knight',d:'The L-shaped jumper',s:[
+[F('4k3/8/8/8/3N4/8/8/7K'),'Knights move in an <b>L-shape</b>: two squares one way, then one square sideways. They are the only pieces that can <b>jump</b> over others.','d4'],
+[F('4k3/8/3p4/8/4N3/8/8/7K'),'Capture the pawn on d6 with your knight.','e4',['d6']]]},
+{n:'The king',d:'Small steps, big responsibility',s:[
+[F('4k3/8/8/8/3K4/8/8/8'),'The king moves <b>one square</b> in any direction. He is slow but the most important piece in the game.','d4'],
+[F('8/8/8/8/3k4/8/3K4/8'),'A king may never move to a square that is attacked. Here the black king guards c3, d3 and e3 — see how those squares are missing?','d2'],
+[F('4k3/8/8/8/4K3/8/8/8'),'Your turn: move the king one step anywhere.','e4','any']]},
+{n:'Check & checkmate',d:'How games are won',s:[
+[F('4k3/8/8/8/8/8/R7/7K'),'When a king is attacked it is in <b>check</b>. The player must escape by moving the king, blocking the attack, or capturing the attacker.','a2'],
+[F('4k3/8/8/8/8/8/R7/7K'),'Give check! Move your rook so it attacks the black king.','a2','check'],
+[F('6k1/5ppp/8/8/8/8/5PPP/4R1K1'),'If the king is in check and has <b>no escape</b>, it is <b>checkmate</b> — you win! Here Black’s own pawns trap the king. Find the mate in one.','e1','mate'],
+[F('k7/8/1K6/8/8/8/8/7R'),'One more: the black king is stuck in the corner. Deliver checkmate!','h1','mate'],
+['7k/8/6Q1/8/8/8/8/4K3 b - - 0 1','<b>Stalemate:</b> if a player is <b>not</b> in check but has no legal move, the game is a <b>draw</b>. Black to move here has no moves — be careful when you are far ahead!']]},
+{n:'Special moves',d:'Castling and en passant',s:[
+['4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1','<b>Castling</b> protects your king and activates a rook: move the king two squares toward a rook, and the rook jumps over to the other side. Castle now!','e1','castle'],
+['4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1','<b>En passant:</b> if an enemy pawn jumps two squares and lands beside your pawn, you may capture it as if it had moved only one — but only right away. Black just played d7–d5; capture it!','e5','ep']]},
+{n:'Tips to get started',d:'Piece values and opening principles',s:[
+[SP,'<b>Piece values:</b> pawn 1 · knight 3 · bishop 3 · rook 5 · queen 9. Trade evenly, and look for chances to win more than you lose.'],
+[SP,'<b>Opening ideas:</b> control the centre (e4, d4), develop your knights and bishops, castle early, and avoid moving the same piece twice.'],
+[SP,'Before every move ask: <b>What is my opponent threatening?</b> and <b>Is my piece safe?</b> Now you are ready — try Puzzles or play the computer!']]}];
+const LN={on:0,l:0,k:0,done:1,msg:'',lock:0,bad:0};
+let DN=(()=>{try{return JSON.parse(localStorage.getItem('cn-ln'))||[]}catch(e){return[]}})();
+const sqi=s=>(8-+s[1])*8+'abcdefgh'.indexOf(s[0]);
+const mated=X=>!legal(X).length&&inCheck(X);
+const parse=f=>{const[p,t,c,e]=f.split(' '),b=[];for(const ch of p){if(ch=='/')continue;if(+ch)for(let i=0;i<+ch;i++)b.push(null);else b.push(ch)}return{b,t,c:c&&c!='-'?c:'',ep:e&&e!='-'?sqi(e):-1,hm:0}};
+const ok=(n1,m,g)=>Array.isArray(g)?g.some(s=>sqi(s)==m.t):g=='check'?inCheck(n1):g=='mate'?mated(n1):g=='castle'?!!m.ca:g=='ep'?!!m.e:g=='promo'?!!m.pr:true;
+const cur=()=>LS[LN.l].s[LN.k];
+function ui(){const L=LS[LN.l],s=cur();$('#lnt').innerHTML=`<b>${L.n} · ${LN.k+1}/${L.s.length}</b>${s[1]}`;
+ base=LN.msg;sh();const st=$('#st');st.classList.toggle('pzok',!!(LN.done&&s[3]));st.classList.toggle('pzbad',!!LN.bad);
+ $('#lnp').disabled=!LN.k;$('#lnh').hidden=!s[3]||s[3]=='any'||!!LN.done;$('#lnn').disabled=!LN.done;$('#lnn').textContent=LN.k==L.s.length-1?'Finish ✓':'Next ›'}
+function load(){const s=cur();window.rpDrop&&rpDrop();gid++;S=parse(s[0]);H=[];lm=null;hn=null;endMsg=null;over=false;busy=false;ai=false;tmv=0;flip=false;
+ sel=s[2]?sqi(s[2]):null;LN.done=!s[3];LN.bad=0;LN.msg=s[3]?'Your move':'Tap pieces to explore';$('#pro').classList.remove('show');$('#ov').classList.remove('show');build();paint();info();ui()}
+function enter(l){LN.on=1;LN.l=l;LN.k=0;window.rpExit&&rpExit();document.body.classList.remove('pzon');document.body.classList.add('lnon');
+ $('#lnm').classList.remove('show');$('#start').classList.add('hide');$('#bk').hidden=true;load()}
+function leave(){LN.on=0;document.body.classList.remove('lnon')}
+const _pl=play;
+play=function(m,pr){
+ if(!LN.on||LN.lock)return _pl(m,pr);
+ const g=cur()[3];
+ if(!g||LN.done){sel=null;paint();LN.msg=g?'Tap Next to continue':'Tap Next to continue';ui();return}
+ const n1=make(S,m,pr||'q');
+ if(!ok(n1,m,g)){LN.bad=1;LN.msg='Not quite — try again (💡 for a hint)';sel=cur()[2]?sqi(cur()[2]):null;hn=null;build();paint();const b=$('#board');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');if(navigator.vibrate)navigator.vibrate(30);ui();return}
+ LN.lock=1;try{_pl(m,pr)}finally{LN.lock=0}hn=null;LN.done=1;LN.bad=0;LN.msg='✓ Well done!';setTimeout(()=>{ui();SND.start()},380)};
+const _inf=info;
+info=function(){_inf.apply(this,arguments);if(!LN.on)return;$('#ov').classList.remove('show');if(!over&&base!==LN.msg)ui()};
+$('#lnh').onclick=()=>{const g=cur()[3];if(!g||LN.done)return;let h=null;
+ if(Array.isArray(g))h={f:sqi(g[0]),t:sqi(g[0])};
+ else{const m=legal(S).find(m=>ok(make(S,m,'q'),m,g));if(m)h={f:m.f,t:m.t}}
+ if(h){hn=h;sel=null;paint()}};
+$('#lnn').onclick=()=>{const L=LS[LN.l];if(LN.k<L.s.length-1){LN.k++;load();SND.tick()}else{if(!DN.includes(LN.l))DN.push(LN.l);try{localStorage.setItem('cn-ln',JSON.stringify(DN))}catch(e){}openM()}};
+$('#lnp').onclick=()=>{if(LN.k){LN.k--;load()}};
+/* lesson picker */
+const M=document.createElement('div');M.id='lnm';document.body.appendChild(M);
+function openM(){M.innerHTML=`<div class="in"><div class="top"><button id="lnx">‹ Back</button><button id="lnhm">Home</button></div><h2>Learn to play chess</h2><p>${DN.length}/${LS.length} lessons completed</p>`+
+ LS.map((l,i)=>`<button class="lc${DN.includes(i)?' dn':''}" data-i="${i}"><i>${DN.includes(i)?'✓':i+1}</i><b>${l.n}</b><em>${l.s.length} steps ›</em><small>${l.d}</small></button>`).join('')+'</div>';
+ M.classList.add('show');M.scrollTop=0}
+M.addEventListener('click',e=>{const c=e.target.closest('.lc');if(c)return enter(+c.dataset.i);
+ if(e.target.id=='lnx'){M.classList.remove('show')}
+ if(e.target.id=='lnhm'){M.classList.remove('show');leave();$('#mn').click()}});
+$('#lnl').onclick=openM;
+$('#ln').onclick=openM;
+$('#go').addEventListener('click',leave);$('#pz').addEventListener('click',leave);
+})();
+</script>
+<style>
+/* start screen: fit one screen, no scrolling */
+.start{overflow:hidden}
+.start .card{gap:clamp(5px,1.1dvh,10px);padding:clamp(10px,1.8dvh,18px) 14px;max-height:calc(100dvh - 16px)}
+.start .card::before{left:24px;right:24px}
+.start .hd{gap:10px}.start .mark .lg2{width:clamp(34px,6dvh,50px);height:clamp(34px,6dvh,50px)}
+.start h2{font-size:clamp(1.25rem,3.6dvh,1.7rem)}
+.start .tag{display:none}
+.start .sec{gap:4px}
+.seg button{min-height:clamp(34px,5.4dvh,46px);padding:4px;border-radius:10px}
+.seg button small,.hint{display:none}
+.modes button{padding:6px 10px}
+.modes .ic{width:20px;height:20px}
+.pg{width:26px;height:26px;font-size:1.15rem;border-radius:8px}
+.snd button{min-height:30px;padding:3px 14px}
+.sum{padding:5px 8px;font-size:.72rem}
+.go{padding:clamp(9px,1.6dvh,13px);font-size:1rem}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row2 .go{padding:clamp(8px,1.4dvh,11px) 6px;font-size:.9rem;border-radius:12px}
+.bk{left:auto;right:12px;top:12px}
+.start .card:has(.bk:not([hidden])) .hd{margin-top:0}
+@media (max-height:560px){.sum{display:none}.start .hd .mark{display:none}}
+</style>
+<script>
+$('#lnmn').onclick=()=>$('#mn').click();
+</script>
+<style>#lnb button{font-size:.76rem;padding:0 4px}</style>
+<style>
+#bk{display:none!important}
+#gb{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:10px;z-index:6;display:flex;align-items:center;gap:4px;padding:6px 12px 6px 8px;border-radius:999px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font:700 .8rem system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.15)}
+#gb svg{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+#gb:active{transform:scale(.96)}
+@media (max-width:820px) and (min-height:521px){#gb{position:static;order:-2;flex:none;align-self:flex-start;margin-left:calc((100vw - var(--bs))/2 - 5px);padding:5px 11px 5px 7px}}
+@media (max-height:520px){#gb{display:none}}
+</style>
+<script>$('#gb').onclick=()=>$('#mn').click();</script>
+<style>
+.dn{position:absolute;top:12px;right:12px;z-index:3;width:38px;height:38px;display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid var(--bd);background:var(--bg);color:var(--tx);cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.14);transition:transform .2s,background .2s}
+.dn:active{transform:scale(.92) rotate(20deg)}
+.dn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;grid-area:1/1;transition:opacity .25s,transform .35s}
+.dn .moon{fill:currentColor;stroke:none}
+.dn .sun{opacity:0;transform:rotate(-60deg) scale(.5)}
+.dark-ui .dn .sun{opacity:1;transform:none}.dark-ui .dn .moon{opacity:0;transform:rotate(60deg) scale(.5)}
+.start .hd{padding-right:46px}
+</style>
+<script>
+(()=>{const dk=()=>{const t=document.documentElement.dataset.theme;return t=='dark'||(t!='light'&&mqd.matches)};
+const sync=()=>{document.documentElement.classList.toggle('dark-ui',dk());const b=$('#dn');b.title=dk()?'Switch to day':'Switch to night'};
+$('#dn').onclick=()=>{ti=dk()?1:2;try{localStorage.setItem('cn-theme',TH[ti])}catch(x){}applyTheme();SND.tick()};
+new MutationObserver(sync).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+mqd.addEventListener&&mqd.addEventListener('change',sync);sync()})();
 </script>
 </body>
 </html>
